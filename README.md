@@ -19,6 +19,7 @@ These tools are designed for recovering lost image entries, rebuilding the image
 This script scans the directory you provide via <code>--outputs</code> and compares files to the entries stored in the database.  
 Any images that exist on disk but are missing from the database are added back.
 The path is defined by the string in your invokeai.yaml
+Script also attempts to recover any metadata image might have.
 
 The script:
 - Scans `<OUTPUTS_PATH>/images/`

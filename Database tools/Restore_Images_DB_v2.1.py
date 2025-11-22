@@ -11,8 +11,7 @@ InvokeAI images reindex tool.
     "Import dd-mm-yy HH:MM"
 - Optionally generates thumbnails for these images.
 
-No heuristics, no guessing assets/intermediate. Everything restored is
-treated as a normal internal image (image_origin="internal", image_category="general").
+Everything restored is treated as a normal internal image (image_origin="internal", image_category="general").
 User intervention is required for further classification, sorting, or cleanup in the UI.
 """
 import argparse
