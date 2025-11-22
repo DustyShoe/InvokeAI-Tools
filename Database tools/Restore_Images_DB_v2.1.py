@@ -58,11 +58,6 @@ def build_arg_parser():
         action="store_true",
         help="Verbose output",
     )
-    parser.add_argument(
-        "--gen-thumbs",
-        action="store_true",
-        help="Generate thumbnails for newly inserted images if missing",
-    )
     return parser
 
 def parse_args():
@@ -427,9 +422,8 @@ def main():
                 img.close()
                 continue
 
-            # Generate thumbnail if requested
-            if args.gen_thumbs:
-                ensure_thumbnail(outputs_root, path, args.dry_run, args.verbose, img)
+            # Always generate thumbnail if missing    
+            ensure_thumbnail(outputs_root, path, args.dry_run, args.verbose, img)
 
     if not args.dry_run or args.verbose:
         print("Done.")
