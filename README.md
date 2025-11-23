@@ -89,7 +89,7 @@ Launch it manually via PowerShell or CMD, you can use the same virtual environme
    ```
 3. Activate the virtual environment:
    ```bash
-   ./venv/Scripts/activate
+   .venv/Scripts/activate
    ```
 4. Run the script:
     
@@ -115,7 +115,7 @@ Launch it manually via PowerShell or CMD, you can use the same virtual environme
 3. Activate the venv:
    
     ```bash
-    source venv/bin/activate
+    source .venv/bin/activate
     ```
 4. Run the script:
 
