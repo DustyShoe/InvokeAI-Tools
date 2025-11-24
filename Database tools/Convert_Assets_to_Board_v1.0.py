@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 """
-Mark all images from a specific board as assets in InvokeAI DB.
+Mark all images from a specific board as regular internal images in InvokeAI DB.
 
 For all images linked to the given board (by board_name), this script will:
-  - set image_category = 'user'
-  - set image_origin   = 'external'
+  - set image_category = 'general'
+  - set image_origin   = 'internal'
 
-It DOES NOT touch is_intermediate, created_at, deleted_at, or any other fields.
+It does NOT touch is_intermediate, created_at, deleted_at, or any other fields.
 
 Usage examples:
 
-  python mark_board_as_assets.py --db /path/to/invokeai.db --board-name "Recovered 21-11-25"
-  python mark_board_as_assets.py --db invokeai.db --board-name "My Assets Board" --dry-run --verbose
+  python Convert_Board_to_General.py --db /path/to/invokeai.db --board-name "Assets Board"
+  python Convert_Board_to_General.py --db invokeai.db --board-name "Some Board" --dry-run --verbose
 """
 
 import argparse
@@ -21,10 +21,10 @@ from typing import List
 
 def build_arg_parser() -> argparse.ArgumentParser:
     """
-    Build and return the argument parser for the asset reclassification tool.
+    Build and return the argument parser for the reclassification tool.
     """
     parser = argparse.ArgumentParser(
-        description="Mark all images from a specific board as assets (user/external)."
+        description="Mark all images from a specific board as regular internal images (general/internal)."
     )
     parser.add_argument(
         "--db",
@@ -34,7 +34,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--board-name",
         required=True,
-        help="Board name whose images should be reclassified as assets",
+        help="Board name whose images should be reclassified as general/internal",
     )
     parser.add_argument(
         "--dry-run",
@@ -51,7 +51,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def parse_args() -> argparse.Namespace:
     """
-    Parse command-line arguments for the asset reclassification tool.
+    Parse command-line arguments for the reclassification tool.
     """
     parser = build_arg_parser()
     return parser.parse_args()
@@ -59,16 +59,19 @@ def parse_args() -> argparse.Namespace:
 
 def get_board_id_by_name(conn: sqlite3.Connection, board_name: str) -> str:
     """
-    Resolve board_id by board_name.
+    Resolve board_id by board_name (case-insensitive).
 
     Raises:
         SystemExit if the board cannot be found.
     """
     cur = conn.cursor()
-    cur.execute("SELECT board_id FROM boards WHERE LOWER(board_name) = LOWER(?)", (board_name,))
+    cur.execute(
+        "SELECT board_id FROM boards WHERE LOWER(board_name) = LOWER(?)",
+        (board_name,),
+    )
     row = cur.fetchone()
     if not row:
-        raise SystemExit(f"Board with name '{board_name}' not found.")
+        raise SystemExit(f"Board with name '{board_name}' not found (case-insensitive).")
     return row[0]
 
 
@@ -85,17 +88,17 @@ def get_images_for_board(conn: sqlite3.Connection, board_id: str) -> List[str]:
     return [r[0] for r in rows]
 
 
-def mark_images_as_assets(
+def mark_images_as_general(
     conn: sqlite3.Connection,
     image_names: List[str],
     dry_run: bool,
     verbose: bool,
 ) -> int:
     """
-    Mark the given images as assets:
+    Mark the given images as regular internal images:
 
-      image_category = 'user'
-      image_origin   = 'external'
+      image_category = 'general'
+      image_origin   = 'internal'
 
     is_intermediate is NOT modified.
 
@@ -106,7 +109,7 @@ def mark_images_as_assets(
         return 0
 
     if dry_run:
-        print("[DRY] Would update the following images as assets:")
+        print("[DRY] Would update the following images as general/internal:")
         for name in image_names:
             print(f"  - {name}")
         return len(image_names)
@@ -114,14 +117,14 @@ def mark_images_as_assets(
     cur = conn.cursor()
 
     if verbose:
-        print(f"[INFO] Updating {len(image_names)} images as assets...")
+        print(f"[INFO] Updating {len(image_names)} images as general/internal...")
 
     cur.executemany(
         """
         UPDATE images
         SET
-            image_category = 'user',
-            image_origin   = 'external'
+            image_category = 'general',
+            image_origin   = 'internal'
         WHERE image_name = ?
         """,
         [(name,) for name in image_names],
@@ -141,7 +144,7 @@ def main():
 
     try:
         board_id = get_board_id_by_name(conn, args.board_name)
-    except SystemExit as e:
+    except SystemExit:
         conn.close()
         raise
 
@@ -158,16 +161,16 @@ def main():
     if args.verbose:
         print(f"[INFO] Found {len(image_names)} images in this board.")
 
-    updated = mark_images_as_assets(conn, image_names, args.dry_run, args.verbose)
+    updated = mark_images_as_general(conn, image_names, args.dry_run, args.verbose)
 
     if args.dry_run:
         print(f"[DRY] Would update {updated} images.")
     else:
-        print(f"Updated {updated} images as assets.")
+        print(f"Updated {updated} images as general/internal.")
 
     conn.close()
-   
+
 
 if __name__ == "__main__":
     main()
-    print("Done")
+    print("Done.")
