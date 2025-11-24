@@ -1,7 +1,7 @@
 # InvokeAI Database Tools
 
 A collection of utility scripts for working with the InvokeAI SQLite database.  
-These tools are designed for recovering lost image entries, rebuilding the image index, and reclassifying images as user assets.
+These tools are designed for recovering lost image entries, rebuilding the image index, and reclassifying images as user assets and vice versa.
 
 > <h3 style="color:red; font-weight:bold;"> ⚠️ WARNING: ⚠️</h3>
 > <h3 style="color:red; font-weight:bold;">
@@ -33,7 +33,7 @@ The script:
 
 ---
 
-###  Convert all images from defined board into user assets  
+###  Convert all images from defined board into user assets keeping the board assignment  
 **Script:** `Convert_Board_to_Assets.py`
 
 This tool updates images belonging to a specific board and classifies them as assets.
@@ -44,6 +44,21 @@ It:
 - Updates the corresponding rows in the `images` table:
   - `image_category = "user"`
   - `image_origin = "external"`
+- Does *not* modify board membership or any other fields
+
+---
+
+### Convert all images from a defined board into regular gallery images keeping the board assignment 
+**Script:** `Convert_Assets_to_Board_v1.0.py`
+
+This tool updates images belonging to a specific board and classifies them as regular gallery images.
+
+It:
+- Locates a board by name (not case-sensitive)
+- Reads all `image_name` entries from `board_images`
+- Updates the corresponding rows in the `images` table:
+  - `image_category = "general"`
+  - `image_origin = "internal"`
 - Does *not* modify board membership or any other fields
 
 Useful for reorganizing imports or turning grouped images into asset references.
@@ -71,7 +86,13 @@ venv already activated. Just click `>_` button in lower left corner
     or
 
     ```bash
-    python Convert_Board_to_Assets.py --db path\to\invokeai.db --board-name "Board name" --verbose
+    python path/to/Convert_Board_to_Assets.py --db path/to/invokeai.db --board-name "Board name to convert" --verbose
+    ```
+
+    or
+
+    ```bash
+    python path/to/Convert_Assets_to_Board_v1.0.py --db path/to/invokeai.db --board-name "Board name to convert" --verbose
     ```
 
 ---
@@ -85,24 +106,30 @@ Launch it manually via PowerShell or CMD, you can use the same virtual environme
 1. Open a terminal.
 2. Navigate to your InvokeAI installation directory:
    ```bash
-   cd path/to/InvokeAI
+   cd path\to\InvokeAI
    ```
 3. Activate the virtual environment:
    ```bash
-   .venv/Scripts/activate
+   .venv\Scripts\activate
    ```
 4. Run the script:
     
    ```bash
-   python path/to/scripts/Restore_Images_DB_v2.1.py --db path/to/invokeai.db --outputs path/to/outputs
+   python path\to\Restore_Images_DB_v2.1.py --db path\to\invokeai.db --outputs path/to/outputs
    ```
    
    or
 
 
    ```bash 
-   python path/to/scripts/Convert_Board_to_Assets.py --db path/to/invokeai.db --board-name "Board name to convert" --verbose
+   python path\to\Convert_Board_to_Assets.py --db path\to\invokeai.db --board-name "Board name to convert" --verbose
    ```
+
+   or
+
+    ```bash
+    python path\to\Convert_Assets_to_Board_v1.0.py --db path\to\invokeai.db --board-name "Board name to convert" --verbose
+    ```
 
 ### Linux / macOS
 
@@ -120,8 +147,22 @@ Launch it manually via PowerShell or CMD, you can use the same virtual environme
 4. Run the script:
 
     ```bash
-    python /path/to/scripts/Restore_Images_DB_v2.1.py --db /path/to/invokeai.db --outputs /path/to/outputs
+    python /path/to/Restore_Images_DB_v2.1.py --db /path/to/invokeai.db --outputs /path/to/outputs
     ```
+
+    or
+
+
+   ```bash 
+   python path/to/Convert_Board_to_Assets.py --db path/to/invokeai.db --board-name "Board name to convert" --verbose
+   ```
+
+   or
+
+    ```bash
+    python path/to/Convert_Assets_to_Board_v1.0.py --db path/to/invokeai.db --board-name "Board name to convert" --verbose
+    ```
+
 
    This uses the same Python environment as InvokeAI, so no extra dependencies are required.
 
