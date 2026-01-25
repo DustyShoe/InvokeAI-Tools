@@ -10,8 +10,8 @@ It DOES NOT touch is_intermediate, created_at, deleted_at, or any other fields.
 
 Usage examples:
 
-  python mark_board_as_assets.py --db /path/to/invokeai.db --board-name "Recovered 21-11-25"
-  python mark_board_as_assets.py --db invokeai.db --board-name "My Assets Board" --dry-run --verbose
+  python Convert_Board_to_Assets_v1.0.py --db /path/to/invokeai.db --board-name "Some_Board"
+  python Convert_Board_to_Assets_v1.0.py --db databases/invokeai.db --board-name "Some_Board" --dry-run --verbose
 """
 
 import argparse

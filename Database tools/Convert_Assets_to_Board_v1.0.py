@@ -10,8 +10,8 @@ It does NOT touch is_intermediate, created_at, deleted_at, or any other fields.
 
 Usage examples:
 
-  python Convert_Board_to_General.py --db /path/to/invokeai.db --board-name "Assets Board"
-  python Convert_Board_to_General.py --db invokeai.db --board-name "Some Board" --dry-run --verbose
+  python Convert_Board_to_General.py --db /path/to/invokeai.db --board-name "Some_Board"
+  python Convert_Board_to_General.py --db databases/invokeai.db --board-name "Some_Board" --dry-run --verbose
 """
 
 import argparse
