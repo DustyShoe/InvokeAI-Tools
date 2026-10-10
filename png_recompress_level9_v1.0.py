@@ -53,6 +53,14 @@ class UnsupportedPngError(ValueError):
     """Raised when a PNG cannot be safely handled by the chosen engine."""
 
 
+
+def cancellation_checkpoint() -> None:
+    marker = os.environ.get("INVOKEAI_TOOLS_STOP_FILE")
+    if marker and Path(marker).is_file():
+        print("[STOPPED] Stopped safely between files. Completed images are preserved.", flush=True)
+        raise SystemExit(130)
+
+
 def parse_args() -> argparse.Namespace:
     """Build CLI parser."""
     parser = argparse.ArgumentParser(
@@ -118,6 +126,7 @@ def iter_png_files(path: Path, recursive: bool) -> Iterable[Path]:
 
     iterator = path.rglob("*") if recursive else path.glob("*")
     for candidate in iterator:
+        cancellation_checkpoint()
         if candidate.is_file() and candidate.suffix.lower() == ".png":
             yield candidate
 
@@ -377,6 +386,7 @@ def main() -> int:
     }
 
     for png_path in png_files:
+        cancellation_checkpoint()
         try:
             result = process_file(
                 png_path,
@@ -401,6 +411,7 @@ def main() -> int:
         if args.verbose or result.status not in {"unchanged"}:
             print_result(png_path, result)
 
+    cancellation_checkpoint()
     print(
         "\nSummary: "
         f"total={len(png_files)}, "

@@ -48,6 +48,22 @@ import PIL.Image
 import yaml
 
 
+
+def stop_requested() -> bool:
+    """Cooperative GUI cancellation; never interrupt a write in progress."""
+    marker = os.environ.get("INVOKEAI_TOOLS_STOP_FILE")
+    return bool(marker and Path(marker).is_file())
+
+
+def cancellation_checkpoint(connection=None) -> None:
+    if stop_requested():
+        if connection is not None:
+            connection.rollback()
+            connection.close()
+        print("[STOPPED] Stopped safely. Pending database changes were rolled back.", flush=True)
+        raise SystemExit(130)
+
+
 class ConfigMapper:
     """Configuration loader."""
 
@@ -366,6 +382,7 @@ def iter_image_files(outputs_path: Path, recurse: bool) -> list[Path]:
     pattern = "**/*" if recurse else "*"
     image_paths = []
     for path in outputs_path.glob(pattern):
+        cancellation_checkpoint()
         if not path.is_file():
             continue
         if any(part.lower() == "thumbnails" for part in path.relative_to(outputs_path).parts):
@@ -474,6 +491,7 @@ def main() -> int:
     print(f"Using database: {database_path}")
     print(f"Using outputs : {outputs_path}")
 
+    cancellation_checkpoint()
     if not args.dry_run and not args.no_backup:
         backup_db(database_path, backup_dir)
 
@@ -512,6 +530,7 @@ def main() -> int:
     created_boards: list[str] = []
 
     for image_path in image_paths:
+        cancellation_checkpoint(connection)
         image_name = image_path.name
         stats["processed"] += 1
 
@@ -600,6 +619,7 @@ def main() -> int:
             stats["errors"] += 1
             print(f"Error processing {image_path}: {exc}")
 
+    cancellation_checkpoint(connection)
     if not args.dry_run:
         connection.commit()
     connection.close()

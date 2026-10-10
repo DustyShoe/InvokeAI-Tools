@@ -30,9 +30,25 @@ its full path; in PowerShell, put paths containing spaces in double quotes.
 """
 
 import argparse
+import os
 import sqlite3
 from pathlib import Path
 from typing import List
+
+
+
+def stop_requested() -> bool:
+    """Cooperative GUI cancellation; never interrupt a write in progress."""
+    marker = os.environ.get("INVOKEAI_TOOLS_STOP_FILE")
+    return bool(marker and Path(marker).is_file())
+
+
+def cancellation_checkpoint(connection=None) -> None:
+    if stop_requested():
+        if connection is not None:
+            connection.rollback()
+        print("[STOPPED] Stopped safely. Pending database changes were rolled back.", flush=True)
+        raise SystemExit(130)
 
 
 def resolve_paths() -> tuple[Path, Path]:
@@ -95,7 +111,7 @@ def filter_existing_images(image_names: List[str], outputs_path: Path, verbose: 
     """Keep board images present in outputs/images, excluding thumbnails."""
     available = {
         path.name for path in outputs_path.rglob("*")
-        if path.is_file()
+        if not cancellation_checkpoint() and path.is_file()
         and not any(part.lower() == "thumbnails" for part in path.relative_to(outputs_path).parts)
     }
     existing = [name for name in image_names if name in available]
@@ -195,6 +211,7 @@ def mark_images_as_general(
     if dry_run:
         print("[DRY] Would update the following images as general/internal:")
         for name in image_names:
+            cancellation_checkpoint(conn)
             print(f"  - {name}")
         return len(image_names)
 
@@ -203,6 +220,7 @@ def mark_images_as_general(
     if verbose:
         print(f"[INFO] Updating {len(image_names)} images as general/internal...")
 
+    cancellation_checkpoint(conn)
     cur.executemany(
         """
         UPDATE images
@@ -211,8 +229,9 @@ def mark_images_as_general(
             image_origin   = 'internal'
         WHERE image_name = ?
         """,
-        [(name,) for name in image_names],
+        ((name,) for name in image_names if not cancellation_checkpoint(conn)),
     )
+    cancellation_checkpoint(conn)
     conn.commit()
 
     if verbose:
@@ -223,6 +242,7 @@ def mark_images_as_general(
 
 def main():
     args = parse_args()
+    cancellation_checkpoint()
 
     database_path, outputs_path = resolve_paths()
     print(f"Using database: {database_path}")
