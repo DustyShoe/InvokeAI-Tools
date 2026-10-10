@@ -1,5 +1,7 @@
 # InvokeAI Database Tools
 
+For easier use, try the [GUI version of this toolset — InvokeAI-Tools-GUI](https://github.com/DustyShoe/InvokeAI-Tools-GUI).
+
 Utilities for recovering InvokeAI image records and metadata, and converting board images between gallery images and user assets. The database scripts are in `Database tools/`.
 
 > <h3 align="center" style="color:red; font-weight:bold;"> ⚠️ WARNING: ⚠️</h3>
