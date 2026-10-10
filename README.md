@@ -188,20 +188,3 @@ python ./Tools/Convert_Assets_to_Board_v1.1.py --board-name "Some_Board" --dry-r
 ```
 
 Use `python ./Tools/Restore_Images_DB_v3.1.py --help` (or the corresponding script name) to see its supported options. Omit `Tools/` for scripts placed directly in the root.
-
-## Cooperative cancellation
-
-All four maintenance scripts support an optional stop request through the
-`INVOKEAI_TOOLS_STOP_FILE` environment variable. A controller sets it to a unique
-marker-file path and creates that file to request cancellation. Normal CLI usage
-is unchanged when this variable is absent.
-
-Scripts exit with code 130 after observing the request at a safe checkpoint.
-Database operations roll back their pending transaction; a final commit already
-in progress is allowed to complete. PNG recompression completes the current file
-and its atomic replacement before stopping. Previously completed PNG files and
-any database backup already created are retained. Controllers should wait for
-normal process exit rather than forcibly terminate the process.
-
-The desktop interface is maintained separately in
-[InvokeAI-Tools-GUI](https://github.com/DustyShoe/InvokeAI-Tools-GUI).
