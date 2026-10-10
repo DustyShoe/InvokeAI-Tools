@@ -20,16 +20,16 @@ directly to the SQLite database.
 Examples (PowerShell)::
 
     # Use the paths configured in invokeai.yaml (run from the InvokeAI root).
-    python ./rescan_image_metadata_v1.0.py
+    python ./Restore_Images_DB_v3.0.py
 
     # Override both the database and output-image paths.
-    python ./rescan_image_metadata_v1.0.py --db-path "D:/InvokeAI/databases/invokeai.db" --outputs-path "E:/InvokeAI/outputs/images"
+    python ./Restore_Images_DB_v3.0.py --db-path "D:/InvokeAI/databases/invokeai.db" --outputs-path "E:/InvokeAI/outputs/images"
 
     # Preview changes without modifying the database or creating boards.
-    python ./rescan_image_metadata_v1.0.py --db-path "D:/InvokeAI/databases/invokeai.db" --outputs-path "E:/InvokeAI/outputs/images" --dry-run
+    python ./Restore_Images_DB_v3.0.py --db-path "D:/InvokeAI/databases/invokeai.db" --outputs-path "E:/InvokeAI/outputs/images" --dry-run
 
     # Scan only files directly inside outputs/images, without subdirectories.
-    python ./rescan_image_metadata_v1.0.py --no-recurse
+    python ./Restore_Images_DB_v3.0.py --no-recurse
 """
 
 import argparse
@@ -608,8 +608,8 @@ def main() -> int:
     print(f"  Processed            : {stats['processed']}")
     print(f"  Inserted             : {stats['inserted']}")
     print(f"  Metadata updated     : {stats['updated']}")
-    print(f"  Skipped (has metadata): {stats['skipped_has_metadata']}")
-    print(f"  Skipped (no metadata): {stats['skipped_no_metadata']}")
+    print(f"  Skipped (already in DB with metadata): {stats['skipped_has_metadata']}")
+    print(f"  Skipped (already in DB; no metadata found in file): {stats['skipped_no_metadata']}")
     print(f"  Errors               : {stats['errors']}")
     print(f"  Added to {import_board_name}: {stats['added_to_import_board']}")
     print(f"  Added to {no_metadata_board_name}: {stats['added_to_no_metadata_board']}")
