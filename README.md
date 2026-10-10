@@ -205,13 +205,3 @@ normal process exit rather than forcibly terminate the process.
 
 The desktop interface is maintained separately in
 [InvokeAI-Tools-GUI](https://github.com/DustyShoe/InvokeAI-Tools-GUI).
-
-### Cancellation regression checks
-
-With Pillow and PyYAML installed:
-
-```powershell
-python -m unittest discover -s tests -v
-```
-
-These checks use temporary databases and generated images, not live InvokeAI data.
